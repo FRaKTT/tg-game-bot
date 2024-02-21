@@ -9,7 +9,10 @@ import (
 	storagePkg "github.com/fraktt/tg-game-bot/internal/pkg/storage"
 )
 
-const defaultFileStorageFilename = "bot_data.json"
+const (
+	defaultStorageFilename = "bot_data.json"
+	storageFilePermissions = 0666
+)
 
 type storage struct {
 	filename string
@@ -18,10 +21,10 @@ type storage struct {
 
 func New(filename string) (storagePkg.Interface, error) {
 	if filename == "" {
-		filename = defaultFileStorageFilename
+		filename = defaultStorageFilename
 	}
 
-	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0666)
+	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, storageFilePermissions)
 	if err != nil {
 		return nil, fmt.Errorf("open file %q: %w", filename, err)
 	}
@@ -79,7 +82,7 @@ func (s *storage) SaveUserStep(userID int, stepID int) error {
 		return fmt.Errorf("marshal updated users steps: %w", err)
 	}
 
-	os.WriteFile(s.filename, updatedData, 666) // todo: 0666 ?
+	os.WriteFile(s.filename, updatedData, storageFilePermissions)
 
 	return nil
 }
