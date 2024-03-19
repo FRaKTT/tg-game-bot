@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	storagePkg "github.com/fraktt/tg-game-bot/internal/pkg/storage"
+	storagePkg "github.com/fraktt/tg-game-bot/internal/storage"
 )
 
 const (

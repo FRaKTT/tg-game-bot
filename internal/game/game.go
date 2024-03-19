@@ -3,12 +3,12 @@ package game
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"strings"
 	"time"
 
-	"github.com/fraktt/tg-game-bot/internal/pkg/storage"
+	"github.com/fraktt/tg-game-bot/internal/storage"
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -52,7 +52,7 @@ func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessag
 	var errMsg string
 	defer func() {
 		if errMsg != "" {
-			log.Printf(errMsg)
+			logrus.Error(errMsg)
 			res = append(res, ProcessMessageResult{
 				Text: fmt.Sprintf("что-то пошло не так: %s", errMsg),
 			})
@@ -111,7 +111,7 @@ func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessag
 		}
 	}
 
-	log.Printf("ProcessMessage: [user %d,%s,%s,%s] - (step %v(%d)) msg: %q",
+	logrus.Infof("ProcessMessage: [user %d,%s,%s,%s] - (step %v(%d)) msg: %q",
 		user.ID, user.FirstName, user.LastName, user.UserName, step.GetName(), step.GetID(), userMsg)
 
 	// проходим по линейным шагам

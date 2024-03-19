@@ -1,26 +1,27 @@
 package main
 
 import (
-	"log"
+	"os"
 
-	"github.com/fraktt/tg-game-bot/internal/config"
-	botPkg "github.com/fraktt/tg-game-bot/internal/pkg/bot"
-	fileStorage "github.com/fraktt/tg-game-bot/internal/pkg/storage/file"
-	memoryStorage "github.com/fraktt/tg-game-bot/internal/pkg/storage/memory"
+	botPkg "github.com/fraktt/tg-game-bot/internal/bot"
+	"github.com/fraktt/tg-game-bot/internal/logging"
+	fileStorage "github.com/fraktt/tg-game-bot/internal/storage/file"
+	memoryStorage "github.com/fraktt/tg-game-bot/internal/storage/memory"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	apiKey := config.GetAPIKey()
+	logging.SetupLogging()
+
+	apiKey := os.Getenv("TGBOTAPIKEY")
 
 	_ = memoryStorage.New() // todo: выбор хранилища можно реализовать через аргументы или переменные среды
 	storage, err := fileStorage.New("")
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 
 	bot := botPkg.MustNew(apiKey, storage)
-
-	if err := bot.Run(); err != nil {
-		log.Fatal(err)
-	}
+	logrus.Info("Launching bot")
+	logrus.Fatal(bot.Run())
 }

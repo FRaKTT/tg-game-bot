@@ -2,11 +2,11 @@ package bot
 
 import (
 	"fmt"
-	"log"
 
-	gamePkg "github.com/fraktt/tg-game-bot/internal/pkg/game"
-	"github.com/fraktt/tg-game-bot/internal/pkg/storage"
+	gamePkg "github.com/fraktt/tg-game-bot/internal/game"
+	"github.com/fraktt/tg-game-bot/internal/storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sirupsen/logrus"
 )
 
 type bot struct {
@@ -21,15 +21,15 @@ type Interface interface {
 func MustNew(apiKey string, storage storage.Interface) Interface {
 	botAPI, err := tgbotapi.NewBotAPI(apiKey)
 	if err != nil {
-		log.Panic(fmt.Errorf("botAPI init: %w", err))
+		logrus.Panic(fmt.Errorf("botAPI init: %w", err))
 	}
 
 	botAPI.Debug = true
-	log.Printf("Authorized on account %s", botAPI.Self.UserName)
+	logrus.Printf("Authorized on account %s", botAPI.Self.UserName)
 
 	game, err := gamePkg.New(storage)
 	if err != nil {
-		log.Panic(fmt.Errorf("create game: %w", err))
+		logrus.Panic(fmt.Errorf("create game: %w", err))
 	}
 
 	return &bot{
