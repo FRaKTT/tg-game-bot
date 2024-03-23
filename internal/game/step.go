@@ -10,8 +10,8 @@ type Step interface {
 type LinearStep struct {
 	ID         int
 	Name       string
-	NextStepID int
 	Message    string
+	NextStepID int
 }
 
 func (s LinearStep) GetName() string {
@@ -24,8 +24,8 @@ func (s LinearStep) GetID() int {
 type LinearStepRandomMsg struct {
 	ID             int
 	Name           string
-	NextStepID     int
 	RandomMessages []string
+	NextStepID     int
 }
 
 func (s LinearStepRandomMsg) GetName() string {
@@ -42,6 +42,7 @@ type ForkStep struct {
 	NextSteps        map[string]int // map variant -> next step id
 	DefaultNextStep  int            // если ответ не соответствует ни одному из вариантов - переход на следующий шаг
 	DefaultDoNothing bool           // если ответ не соответствует ни одному из вариантов - ничего не делаем
+	// todo: DefaultResponseMessage
 }
 
 func (s ForkStep) GetName() string {

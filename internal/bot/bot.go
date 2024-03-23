@@ -21,15 +21,15 @@ type Interface interface {
 func MustNew(apiKey string, storage storage.Interface) Interface {
 	botAPI, err := tgbotapi.NewBotAPI(apiKey)
 	if err != nil {
-		logrus.Panic(fmt.Errorf("botAPI init: %w", err))
+		logrus.Panicf("botAPI init: %v", err)
 	}
 
 	botAPI.Debug = true
-	logrus.Printf("Authorized on account %s", botAPI.Self.UserName)
+	logrus.Infof("Authorized on account %s", botAPI.Self.UserName)
 
 	game, err := gamePkg.New(storage)
 	if err != nil {
-		logrus.Panic(fmt.Errorf("create game: %w", err))
+		logrus.Panicf("create game: %v", err)
 	}
 
 	return &bot{
@@ -45,34 +45,27 @@ func (b *bot) Run() error {
 	updates := b.botAPI.GetUpdatesChan(u)
 
 	for update := range updates {
-		switch {
-		case update.Message != nil:
-			results := b.game.ProcessMessage(gamePkg.UserDTO{
-				ID:        update.Message.From.ID,
-				FirstName: update.Message.From.FirstName,
-				LastName:  update.Message.From.LastName,
-				UserName:  update.Message.From.UserName,
-			}, update.Message.Text)
-			results = collapseMessages(results)
+		if update.Message == nil {
+			logrus.Errorf("update.Message == nil")
+			continue
+		}
 
-			for _, r := range results {
-				responseMsg := tgbotapi.NewMessage(update.Message.Chat.ID, "<здесь должен быть текст>")
-				if r.Text != "" {
-					responseMsg.Text = r.Text
-				}
+		logrus.Infof(logRecvMsg(update.Message.From, update.Message.Text))
 
-				if r.Buttons != nil {
-					var buttons [][]tgbotapi.KeyboardButton
-					for _, b := range r.Buttons {
-						buttons = append(buttons, []tgbotapi.KeyboardButton{tgbotapi.NewKeyboardButton(b)})
-					}
-					responseMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(buttons...)
-				} else {
-					responseMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-				}
-				if _, err := b.botAPI.Send(responseMsg); err != nil {
-					return fmt.Errorf("send tg msg: %w", err)
-				}
+		results := b.game.ProcessMessage(gamePkg.UserDTO{
+			ID:        update.Message.From.ID,
+			FirstName: update.Message.From.FirstName,
+			LastName:  update.Message.From.LastName,
+			UserName:  update.Message.From.UserName,
+		}, update.Message.Text)
+		results = collapseMessages(results)
+
+		for _, r := range results {
+			logrus.Infof(logSendMsg(update.Message.From, r))
+
+			responseMsg := fillResponseMsg(update.Message.Chat.ID, r.Text, r.Buttons)
+			if _, err := b.botAPI.Send(responseMsg); err != nil {
+				return fmt.Errorf("send tg msg: %w", err)
 			}
 		}
 	}
@@ -104,4 +97,35 @@ func collapseMessages(results []gamePkg.ProcessMessageResult) []gamePkg.ProcessM
 	}
 
 	return newResults
+}
+
+// fillResponseMsg заполняет сообщение для отправки пользователю
+func fillResponseMsg(chatID int64, text string, buttons []string) tgbotapi.MessageConfig {
+	if text == "" {
+		text = `ОШИБКА: text == ""`
+	}
+	responseMsg := tgbotapi.NewMessage(chatID, text)
+
+	if len(buttons) != 0 {
+		var keyboardButtons [][]tgbotapi.KeyboardButton
+		for _, b := range buttons {
+			keyboardButtons = append(keyboardButtons, []tgbotapi.KeyboardButton{tgbotapi.NewKeyboardButton(b)})
+		}
+		responseMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboardButtons...)
+
+	} else {
+		responseMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
+	}
+
+	return responseMsg
+}
+
+func logRecvMsg(user *tgbotapi.User, text string) string {
+	return fmt.Sprintf("FROM user: [%d,%s,%s,%s] - msg: %q",
+		user.ID, user.FirstName, user.LastName, user.UserName, text)
+}
+
+func logSendMsg(user *tgbotapi.User, r gamePkg.ProcessMessageResult) string {
+	return fmt.Sprintf("TO user: [%d,%s,%s,%s] - response: %q, buttons: %v",
+		user.ID, user.FirstName, user.LastName, user.UserName, r.Text, r.Buttons)
 }

@@ -5,32 +5,30 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/fraktt/tg-game-bot/internal/storage"
 	"github.com/sirupsen/logrus"
 )
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 var ErrStepNotFound = fmt.Errorf("step not found")
 
 type Game struct {
-	storage storage.Interface
-	steps   []Step
+	storage   storage.Interface
+	steps     []Step
+	startStep int
 }
 
 func New(storage storage.Interface) (*Game, error) {
+	// todo: steps и startStep должны задаваться извне
 	steps := hardcodedSteps
 	if err := validateSteps(steps); err != nil {
 		return nil, fmt.Errorf("ошибка валидации шагов: %v", err)
 	}
 
 	return &Game{
-		storage: storage,
-		steps:   steps,
+		storage:   storage,
+		steps:     steps,
+		startStep: stepStart,
 	}, nil
 }
 
@@ -63,16 +61,23 @@ func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessag
 	stepID, err := g.storage.GetUserStep(int(user.ID))
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
-			stepID = stepStart
+			stepID = g.startStep
 		} else {
 			errMsg = fmt.Sprintf("GetUserStep(userID=%v): %v", user.ID, err)
 			return res
 		}
 	}
+
+	// если пользователь отправляет команду /start, нужно начать обрабатывать его заново
+	if userMsg == "/start" {
+		stepID = g.startStep
+	}
+
 	step, err := g.getStepByID(stepID)
 	if err != nil {
 		if errors.Is(err, ErrStepNotFound) {
-			stepID = stepStart
+			stepID = g.startStep
+			step, _ = g.getStepByID(stepID) // получаем step заново
 		} else {
 			errMsg = fmt.Sprintf("getStepByID(stepID=%v): %v", stepID, err)
 			return res
