@@ -27,7 +27,7 @@ func MustNew(apiKey string, storage storage.Interface) Interface {
 	botAPI.Debug = true
 	logrus.Infof("Authorized on account %s", botAPI.Self.UserName)
 
-	game, err := gamePkg.New(storage)
+	game, err := gamePkg.New(storage, gamePkg.DemoGameSteps)
 	if err != nil {
 		logrus.Panicf("create game: %v", err)
 	}

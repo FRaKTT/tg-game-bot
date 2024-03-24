@@ -25,7 +25,7 @@ const (
 )
 
 // демо
-var hardcodedSteps = []Step{
+var DemoGameSteps = []Step{
 	// Intro
 	LinearStep{
 		ID:         stepStart,

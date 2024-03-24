@@ -18,17 +18,20 @@ type Game struct {
 	startStep int
 }
 
-func New(storage storage.Interface) (*Game, error) {
-	// todo: steps и startStep должны задаваться извне
-	steps := hardcodedSteps
+func New(storage storage.Interface, steps []Step) (*Game, error) {
+	if len(steps) == 0 {
+		return nil, fmt.Errorf("пустой список шагов")
+	}
+	startStep := steps[0].GetID()
+
 	if err := validateSteps(steps); err != nil {
-		return nil, fmt.Errorf("ошибка валидации шагов: %v", err)
+		return nil, fmt.Errorf("валидация шагов: %v", err)
 	}
 
 	return &Game{
 		storage:   storage,
 		steps:     steps,
-		startStep: stepStart,
+		startStep: startStep,
 	}, nil
 }
 
