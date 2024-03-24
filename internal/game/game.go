@@ -3,34 +3,35 @@ package game
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"strings"
-	"time"
 
-	"github.com/fraktt/tg-game-bot/internal/pkg/storage"
+	"github.com/fraktt/tg-game-bot/internal/storage"
+	"github.com/sirupsen/logrus"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 var ErrStepNotFound = fmt.Errorf("step not found")
 
 type Game struct {
-	storage storage.Interface
-	steps   []Step
+	storage   storage.Interface
+	steps     []Step
+	startStep int
 }
 
-func New(storage storage.Interface) (*Game, error) {
-	steps := hardcodedSteps
+func New(storage storage.Interface, steps []Step) (*Game, error) {
+	if len(steps) == 0 {
+		return nil, fmt.Errorf("пустой список шагов")
+	}
+	startStep := steps[0].GetID()
+
 	if err := validateSteps(steps); err != nil {
-		return nil, fmt.Errorf("ошибка валидации шагов: %v", err)
+		return nil, fmt.Errorf("валидация шагов: %v", err)
 	}
 
 	return &Game{
-		storage: storage,
-		steps:   steps,
+		storage:   storage,
+		steps:     steps,
+		startStep: startStep,
 	}, nil
 }
 
@@ -52,7 +53,7 @@ func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessag
 	var errMsg string
 	defer func() {
 		if errMsg != "" {
-			log.Printf(errMsg)
+			logrus.Error(errMsg)
 			res = append(res, ProcessMessageResult{
 				Text: fmt.Sprintf("что-то пошло не так: %s", errMsg),
 			})
@@ -63,16 +64,23 @@ func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessag
 	stepID, err := g.storage.GetUserStep(int(user.ID))
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
-			stepID = stepStart
+			stepID = g.startStep
 		} else {
 			errMsg = fmt.Sprintf("GetUserStep(userID=%v): %v", user.ID, err)
 			return res
 		}
 	}
+
+	// если пользователь отправляет команду /start, нужно начать обрабатывать его заново
+	if userMsg == "/start" {
+		stepID = g.startStep
+	}
+
 	step, err := g.getStepByID(stepID)
 	if err != nil {
 		if errors.Is(err, ErrStepNotFound) {
-			stepID = stepStart
+			stepID = g.startStep
+			step, _ = g.getStepByID(stepID) // получаем step заново
 		} else {
 			errMsg = fmt.Sprintf("getStepByID(stepID=%v): %v", stepID, err)
 			return res
@@ -111,7 +119,7 @@ func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessag
 		}
 	}
 
-	log.Printf("ProcessMessage: [user %d,%s,%s,%s] - (step %v(%d)) msg: %q",
+	logrus.Infof("ProcessMessage: [user %d,%s,%s,%s] - (step %v(%d)) msg: %q",
 		user.ID, user.FirstName, user.LastName, user.UserName, step.GetName(), step.GetID(), userMsg)
 
 	// проходим по линейным шагам

@@ -25,7 +25,7 @@ const (
 )
 
 // демо
-var hardcodedSteps = []Step{
+var DemoGameSteps = []Step{
 	// Intro
 	LinearStep{
 		ID:         stepStart,
@@ -45,7 +45,7 @@ var hardcodedSteps = []Step{
 	LinearStep{
 		ID:         stepIntro,
 		Name:       "Intro",
-		Message:    "Это демо игры",
+		Message:    "ДЕМО ИГРА",
 		NextStepID: stepCosmonautQuestion,
 	},
 
