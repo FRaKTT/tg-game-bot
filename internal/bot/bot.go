@@ -52,12 +52,7 @@ func (b *bot) Run() error {
 
 		logrus.Infof(logRecvMsg(update.Message.From, update.Message.Text))
 
-		results := b.game.ProcessMessage(gamePkg.UserDTO{
-			ID:        update.Message.From.ID,
-			FirstName: update.Message.From.FirstName,
-			LastName:  update.Message.From.LastName,
-			UserName:  update.Message.From.UserName,
-		}, update.Message.Text)
+		results := b.game.ProcessMessage(userToDTO(update.Message.From), update.Message.Text)
 		results = collapseMessages(results)
 
 		for _, r := range results {
@@ -120,12 +115,23 @@ func fillResponseMsg(chatID int64, text string, buttons []string) tgbotapi.Messa
 	return responseMsg
 }
 
-func logRecvMsg(user *tgbotapi.User, text string) string {
-	return fmt.Sprintf("FROM user: [%d,%s,%s,%s] - msg: %q",
-		user.ID, user.FirstName, user.LastName, user.UserName, text)
+func userToDTO(u *tgbotapi.User) gamePkg.UserDTO {
+	return gamePkg.UserDTO{
+		ID:        u.ID,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		UserName:  u.UserName,
+	}
 }
 
-func logSendMsg(user *tgbotapi.User, r gamePkg.ProcessMessageResult) string {
-	return fmt.Sprintf("TO user: [%d,%s,%s,%s] - response: %q, buttons: %v",
-		user.ID, user.FirstName, user.LastName, user.UserName, r.Text, r.Buttons)
+func logRecvMsg(u *tgbotapi.User, text string) string {
+	return fmt.Sprintf("FROM user: %s - msg: %q", userLogString(u), text)
+}
+
+func logSendMsg(u *tgbotapi.User, r gamePkg.ProcessMessageResult) string {
+	return fmt.Sprintf("TO user: %s - response: %q, buttons: %v", userLogString(u), r.Text, r.Buttons)
+}
+
+func userLogString(u *tgbotapi.User) string {
+	return fmt.Sprintf("[%d,%s,%s,%s]", u.ID, u.FirstName, u.LastName, u.UserName)
 }
