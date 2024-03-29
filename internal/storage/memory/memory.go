@@ -38,3 +38,10 @@ func (s *storage) SaveUserStep(userID int, stepID int) error {
 
 	return nil
 }
+
+func (s *storage) ReadAll() (string, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return fmt.Sprint(s.usersSteps), nil
+}
