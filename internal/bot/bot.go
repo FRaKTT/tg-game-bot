@@ -1,6 +1,7 @@
 package bot
 
 import (
+	rolesPkg "github.com/fraktt/tg-game-bot/internal/bot/roles"
 	gamePkg "github.com/fraktt/tg-game-bot/internal/game"
 	"github.com/fraktt/tg-game-bot/internal/storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -12,10 +13,10 @@ type Bot struct {
 	storage storage.Interface
 	game    *gamePkg.Game //todo: interface
 
-	roles userRoles
+	roles rolesPkg.UserRoles
 }
 
-func MustNew(apiKey string, storage storage.Interface) *Bot {
+func MustNew(apiKey string, storage storage.Interface, userRoles rolesPkg.UserRoles) *Bot {
 	botAPI, err := tgbotapi.NewBotAPI(apiKey)
 	if err != nil {
 		logrus.Panicf("botAPI init: %v", err)
@@ -33,5 +34,7 @@ func MustNew(apiKey string, storage storage.Interface) *Bot {
 		botAPI:  botAPI,
 		storage: storage,
 		game:    game,
+
+		roles: userRoles,
 	}
 }

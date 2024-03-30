@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	rolesPkg "github.com/fraktt/tg-game-bot/internal/bot/roles"
 	gamePkg "github.com/fraktt/tg-game-bot/internal/game"
 	"github.com/fraktt/tg-game-bot/internal/logging"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -23,12 +24,12 @@ func (b *Bot) Run() error {
 			continue
 		}
 
-		switch b.getUserRole(update.Message.From) {
-		case participantRole:
+		switch b.roles.GetUserRole(update.Message.From) {
+		case rolesPkg.ParticipantRole:
 			if err := b.handleParticipantMessage(update.Message); err != nil {
 				return fmt.Errorf("handle participant message: %w", err)
 			}
-		case adminRole:
+		case rolesPkg.AdminRole:
 			if err := b.handleAdminMessage(update.Message); err != nil {
 				return fmt.Errorf("handle admin message: %w", err)
 			}
