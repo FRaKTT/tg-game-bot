@@ -107,7 +107,6 @@ func fillResponseMsg(chatID int64, text string, buttons []string) tgbotapi.Messa
 			keyboardButtons = append(keyboardButtons, []tgbotapi.KeyboardButton{tgbotapi.NewKeyboardButton(b)})
 		}
 		responseMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(keyboardButtons...)
-
 	} else {
 		responseMsg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 	}

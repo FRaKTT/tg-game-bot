@@ -47,7 +47,7 @@ func (s *storage) GetUserStep(userID int) (int, error) {
 
 	usersSteps := make(map[int]int)
 	if len(data) != 0 {
-		if err := json.Unmarshal(data, &usersSteps); err != nil {
+		if err = json.Unmarshal(data, &usersSteps); err != nil {
 			return 0, fmt.Errorf("unmarshal file: %w", err)
 		}
 	}
@@ -70,7 +70,7 @@ func (s *storage) SaveUserStep(userID int, stepID int) error {
 
 	usersSteps := make(map[int]int)
 	if len(data) != 0 {
-		if err := json.Unmarshal(data, &usersSteps); err != nil {
+		if err = json.Unmarshal(data, &usersSteps); err != nil {
 			return fmt.Errorf("unmarshal file: %w", err)
 		}
 	}
@@ -82,7 +82,9 @@ func (s *storage) SaveUserStep(userID int, stepID int) error {
 		return fmt.Errorf("marshal updated users steps: %w", err)
 	}
 
-	os.WriteFile(s.filename, updatedData, storageFilePermissions)
+	if err = os.WriteFile(s.filename, updatedData, storageFilePermissions); err != nil {
+		return fmt.Errorf("write to file: %w", err)
+	}
 
 	return nil
 }

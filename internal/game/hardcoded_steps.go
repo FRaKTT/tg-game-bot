@@ -24,8 +24,8 @@ const (
 	stepFinish
 )
 
-// демо
-var DemoGameSteps = []Step{
+// DemoGameSteps - демо-игра
+var DemoGameSteps = []Step{ //nolint:gochecknoglobals // demo
 	// Intro
 	LinearStep{
 		ID:         stepStart,

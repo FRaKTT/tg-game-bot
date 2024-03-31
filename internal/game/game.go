@@ -25,7 +25,7 @@ func New(storage storage.Interface, steps []Step) (*Game, error) {
 	startStep := steps[0].GetID()
 
 	if err := validateSteps(steps); err != nil {
-		return nil, fmt.Errorf("валидация шагов: %v", err)
+		return nil, fmt.Errorf("валидация шагов: %w", err)
 	}
 
 	return &Game{
@@ -49,7 +49,7 @@ type (
 	}
 )
 
-func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessageResult) {
+func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessageResult) { //nolint:gocognit,nonamedreturns,lll //todo
 	var errMsg string
 	defer func() {
 		if errMsg != "" {
@@ -130,7 +130,11 @@ func (g *Game) ProcessMessage(user UserDTO, userMsg string) (res []ProcessMessag
 		return res
 	}
 
-	g.storage.SaveUserStep(int(user.ID), stopStepID) //todo: сделать через коллбек, чтоб переходить в другой стейт уже после успешной отправки сообщения
+	//todo: сделать через коллбек, чтоб переходить в другой стейт уже после успешной отправки сообщения
+	if err = g.storage.SaveUserStep(int(user.ID), stopStepID); err != nil {
+		errMsg = err.Error()
+		return res
+	}
 
 	return res
 }
@@ -140,7 +144,7 @@ func normalize(s string) string {
 }
 
 // processStepsChain идёт по непрерывной последовательности шагов
-func (g *Game) processStepsChain(stepID int) (res []ProcessMessageResult, stopStepID int, _ error) {
+func (g *Game) processStepsChain(stepID int) (res []ProcessMessageResult, stopStepID int, _ error) { //nolint:nonamedreturns,lll // todo
 	for {
 		step, err := g.getStepByID(stepID)
 		if err != nil {
@@ -159,7 +163,7 @@ func (g *Game) processStepsChain(stepID int) (res []ProcessMessageResult, stopSt
 			continue
 
 		case LinearStepRandomMsg:
-			randomIdx := rand.Intn(len(v.RandomMessages))
+			randomIdx := rand.Intn(len(v.RandomMessages)) //nolint:gosec // no security requirements
 			res = append(res, ProcessMessageResult{
 				Text: v.RandomMessages[randomIdx],
 			})

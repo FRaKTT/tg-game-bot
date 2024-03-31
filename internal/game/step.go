@@ -72,8 +72,9 @@ func validateSteps(steps []Step) error {
 		switch fs := s.(type) {
 		case ForkStep:
 			if err := validateForkStep(fs); err != nil {
-				return fmt.Errorf("ошибка валидации шага %v: %w", fs.ID, err)
+				return fmt.Errorf("validation of step %v: %w", fs.ID, err)
 			}
+		default:
 		}
 	}
 	return nil
