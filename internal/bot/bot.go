@@ -17,7 +17,7 @@ type Bot struct {
 	adminChatID int64
 }
 
-func MustNew(apiKey string, storage storage.Interface, userRoles rolesPkg.UserRoles) *Bot {
+func MustNew(apiKey string, storage storage.Interface, userRoles rolesPkg.UserRoles, gameSteps []gamePkg.Step) *Bot {
 	botAPI, err := tgbotapi.NewBotAPI(apiKey)
 	if err != nil {
 		logrus.Panicf("botAPI init: %v", err)
@@ -26,7 +26,7 @@ func MustNew(apiKey string, storage storage.Interface, userRoles rolesPkg.UserRo
 	botAPI.Debug = true
 	logrus.Infof("Authorized on account %s", botAPI.Self.UserName)
 
-	game, err := gamePkg.New(storage, gamePkg.DemoGameSteps)
+	game, err := gamePkg.New(storage, gameSteps)
 	if err != nil {
 		logrus.Panicf("create game: %v", err)
 	}

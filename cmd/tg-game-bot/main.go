@@ -5,6 +5,7 @@ import (
 
 	botPkg "github.com/fraktt/tg-game-bot/internal/bot"
 	rolesPkg "github.com/fraktt/tg-game-bot/internal/bot/roles"
+	"github.com/fraktt/tg-game-bot/internal/game/demo"
 	"github.com/fraktt/tg-game-bot/internal/logging"
 	fileStorage "github.com/fraktt/tg-game-bot/internal/storage/file"
 	memoryStorage "github.com/fraktt/tg-game-bot/internal/storage/memory"
@@ -28,7 +29,9 @@ func main() {
 	// rolesPkg.WithParticipantIDs(),
 	)
 
-	bot := botPkg.MustNew(apiKey, storage, ur)
+	gameSteps := demo.DemoGameSteps // todo: set from config, file or env
+
+	bot := botPkg.MustNew(apiKey, storage, ur, gameSteps)
 
 	logrus.Info("Launching bot")
 	logrus.Fatal(bot.Run())

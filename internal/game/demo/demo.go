@@ -1,4 +1,6 @@
-package game
+package demo
+
+import gamePkg "github.com/fraktt/tg-game-bot/internal/game"
 
 const (
 	stepStart = iota + 1
@@ -25,15 +27,15 @@ const (
 )
 
 // DemoGameSteps - демо-игра
-var DemoGameSteps = []Step{ //nolint:gochecknoglobals // demo
+var DemoGameSteps = []gamePkg.Step{ //nolint:gochecknoglobals // demo
 	// Intro
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepStart,
 		Name:       "Start",
 		Message:    "Привет!",
 		NextStepID: stepGreeting,
 	},
-	ForkStep{ // остановка перед началом
+	gamePkg.ForkStep{ // остановка перед началом
 		ID:       stepGreeting,
 		Name:     "Greeting",
 		Variants: []string{"Привет!"},
@@ -42,20 +44,20 @@ var DemoGameSteps = []Step{ //nolint:gochecknoglobals // demo
 		},
 		DefaultNextStep: stepIntro,
 	},
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepIntro,
 		Name:       "Intro",
 		Message:    "ДЕМО ИГРА",
 		NextStepID: stepCosmonautQuestion,
 	},
 
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepCosmonautQuestion,
 		Name:       "CosmonautQuestion",
 		Message:    "Первый вопрос: назови фамилию первого космонавта",
 		NextStepID: stepCosmonautVariants,
 	},
-	ForkStep{
+	gamePkg.ForkStep{
 		ID:       stepCosmonautVariants,
 		Name:     "CosmonautVariants",
 		Variants: []string{"Терешкова", "Гагарин", "Леонов", "Титов"},
@@ -66,20 +68,20 @@ var DemoGameSteps = []Step{ //nolint:gochecknoglobals // demo
 			"Титов":     stepCosmonautBadAnswer,
 		},
 	},
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepCosmonautBadAnswer,
 		Name:       "CosmonautBadAnswer",
 		Message:    "Попробуй ещё раз",
 		NextStepID: stepCosmonautVariants,
 	},
 
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepSpiderQuestion,
 		Name:       "SpiderQuestion",
 		Message:    "Сколько лап паука?",
 		NextStepID: stepSpiderVariants,
 	},
-	ForkStep{
+	gamePkg.ForkStep{
 		ID:       stepSpiderVariants,
 		Name:     "SpiderVariants",
 		Variants: []string{"Четыре", "Шесть", "Восемь", "Шестнадцать"},
@@ -90,46 +92,46 @@ var DemoGameSteps = []Step{ //nolint:gochecknoglobals // demo
 			"Шестнадцать": stepSpiderBadAnswer,
 		},
 	},
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepSpiderBadAnswer,
 		Name:       "SpiderBadAnswer",
 		Message:    "Неверно, попробуй ещё раз",
 		NextStepID: stepSpiderVariants,
 	},
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepSpiderRightAnswer,
 		Name:       "SpiderRightAnswer",
 		Message:    "🕸",
 		NextStepID: stepSnowQuestion,
 	},
 
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepSnowQuestion,
 		Name:       "WaistQuestion",
 		Message:    "На дворе горой, а в избе водой. Что это?",
 		NextStepID: stepSnowVariants,
 	},
-	ForkStepOpenQuestion{
+	gamePkg.ForkStepOpenQuestion{
 		ID:            stepSnowVariants,
 		Name:          "WaistVariants",
 		RightAnswers:  []string{"Снег", "Cytu"}, // для удобства ;)
 		NextStepRight: stepSnowRightAnswer,
 		NextStepWrong: stepSnowBadAnswer,
 	},
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepSnowBadAnswer,
 		Name:       "WaistBadAnswer",
 		Message:    "Неа",
 		NextStepID: stepSnowVariants,
 	},
-	LinearStep{
+	gamePkg.LinearStep{
 		ID:         stepSnowRightAnswer,
 		Name:       "WaistRightAnswer",
 		Message:    "Точно!",
 		NextStepID: stepCongrats,
 	},
 
-	LinearStepRandomMsg{
+	gamePkg.LinearStepRandomMsg{
 		ID:   stepCongrats,
 		Name: "Congrats",
 		RandomMessages: []string{
@@ -138,7 +140,7 @@ var DemoGameSteps = []Step{ //nolint:gochecknoglobals // demo
 		},
 		NextStepID: stepFinish,
 	},
-	ForkStep{
+	gamePkg.ForkStep{
 		ID:       stepFinish,
 		Name:     "Finish",
 		Variants: []string{"Начать заново 🔁"},
