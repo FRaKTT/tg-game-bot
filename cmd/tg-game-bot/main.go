@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
+	"github.com/fraktt/tg-game-bot/demo"
 	botPkg "github.com/fraktt/tg-game-bot/internal/bot"
 	rolesPkg "github.com/fraktt/tg-game-bot/internal/bot/roles"
-	"github.com/fraktt/tg-game-bot/internal/game/demo"
 	"github.com/fraktt/tg-game-bot/internal/logging"
 	fileStorage "github.com/fraktt/tg-game-bot/internal/storage/file"
 	memoryStorage "github.com/fraktt/tg-game-bot/internal/storage/memory"
